@@ -18,11 +18,18 @@ def main():
 
     client = genai.Client(api_key=api_key)
 
-    response = client.models.generate_content(model="gemini-2.0-flash-001", contents=prompt)
+    messages = [genai.types.Content(role="user", parts=[genai.types.Part(text=prompt)]),]
 
+    generate_content(client, messages)
+
+
+def generate_content(client, messages):
+    response = client.models.generate_content(
+        model="gemini-2.0-flash-001",
+        contents=messages,
+    )
+    print("Response:")
     print(response.text)
-    print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
-    print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
 
 
 if __name__ == "__main__":
