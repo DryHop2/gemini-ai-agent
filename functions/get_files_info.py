@@ -4,19 +4,19 @@ def get_files_info(working_directory, directory=None):
     if directory is None:
         directory = working_directory
 
-    working_directory = os.path.abspath(working_directory)
-    directory = os.path.abspath(os.path.join(working_directory, directory))
+    abs_working_directory = os.path.abspath(working_directory)
+    abs_directory = os.path.abspath(os.path.join(working_directory, directory))
 
-    if not (directory == working_directory or directory.startswith(os.path.join(working_directory, ''))):
+    if not (abs_directory == abs_working_directory or directory.startswith(abs_working_directory)):
         return f'Error: Cannot list "{directory}" as it is outside the permitted working directory'
     
-    if not os.path.isdir(directory):
+    if not os.path.isdir(abs_directory):
         return f'Error: "{directory}" is not a directory'
     
     output = []
     try:
-        for entry in os.listdir(directory):
-            full_path = os.path.join(directory, entry)
+        for entry in os.listdir(abs_directory):
+            full_path = os.path.join(abs_directory, entry)
             is_dir = os.path.isdir(full_path)
             if not is_dir and not os.path.isfile(full_path):
                 print(f'Error: "{entry}" is not a file or directory')
