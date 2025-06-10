@@ -2,6 +2,7 @@ import os
 import sys
 from dotenv import load_dotenv
 from google import genai
+from config import SYSTEM_PROMPT
 
 
 def main():
@@ -30,7 +31,10 @@ def main():
 
     client = genai.Client(api_key=api_key)
 
-    messages = [genai.types.Content(role="user", parts=[genai.types.Part(text=prompt)]),]
+    messages = [
+        # genai.types.Content(role="system", parts=[genai.types.Part(text=SYSTEM_PROMPT)]),
+        genai.types.Content(role="user", parts=[genai.types.Part(text=prompt)]),
+    ]
 
     generate_content(client, messages, verbose)
 
@@ -39,6 +43,7 @@ def generate_content(client, messages, verbose):
     response = client.models.generate_content(
         model="gemini-2.0-flash-001",
         contents=messages,
+        config=genai.types.GenerateContentConfig(system_instruction=SYSTEM_PROMPT),
     )
     print("Response:")
     print(response.text)
