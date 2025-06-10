@@ -15,6 +15,8 @@ def write_file(working_directory, file_path, content):
             return f'Error: {file_path} already exists: {e}'
         except Exception as e:
             return f'Error: {e}'
+    if os.path.exists(working_directory) and os.path.isdir(file_path):
+        return f'Error: "{file_path}" is a directory, not a file'
     
     try:
         with open(file_path, "w") as f:
@@ -22,4 +24,4 @@ def write_file(working_directory, file_path, content):
     except Exception as e:
         return f'Error: Unable to write to "{file_path}": {e}'
     
-    print(f'Successfully wrote to "{file_path}" ({len(content)} characters written)')
+    return f'Successfully wrote to "{file_path}" ({len(content)} characters written)'
