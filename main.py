@@ -55,31 +55,49 @@ def generate_content(client, messages, verbose):
             schema_write_file,
         ]
     )
-    response = client.models.generate_content(
-        model="gemini-2.0-flash-001",
-        contents=messages,
-        config=genai.types.GenerateContentConfig(
-            tools=[available_functions],
-            system_instruction=SYSTEM_PROMPT),
-    )
-    if response.function_calls:
-        for call in response.function_calls:
-            function_call_result = call_function(call, verbose=verbose)
-            try:
-                response_data = function_call_result.parts[0].function_response.response
-            except Exception:
-                raise RuntimeError("Fatal Error: No response returned from tool execution.")
-            
-            if verbose:
-                print(f"-> {response_data}")
 
-            messages.append(function_call_result)
-    else:
-        print("Response:")
+    for iteration in range(20):
+        if verbose:
+            print(f"\n--- Iteration {iteration + 1} ---")
+
+        response = client.models.generate_content(
+            model="gemini-2.0-flash-001",
+            contents=messages,
+            config=genai.types.GenerateContentConfig(
+                tools=[available_functions],
+                system_instruction=SYSTEM_PROMPT,
+            ),
+        )
+
+        for candidate in response.candidates:
+            if candidate.content:
+                messages.append(candidate.content)
+                if verbose:
+                    print(f"Model response candidate: {candidate.content.parts[0].text}")
+
+        if response.function_calls:
+            for call in response.function_calls:
+                if verbose:
+                    print(f"Function call detected: {call.name}({call.args})")
+                function_call_result = call_function(call, verbose=verbose)
+
+                try:
+                    _ = function_call_result.parts[0].function_response.response
+                except Exception:
+                    raise RuntimeError("Fatal Error: No response returned from tool execution.")
+                
+                if verbose:
+                    print(f"-> {function_call_result.parts[0].function_response.response}")
+
+                messages.append(function_call_result)
+
+            continue
+
+        print("\nAgent finished:\n")
         print(response.text or "No output produced.")
-    
-    if verbose:
-        print_verbose(response, messages)
+        break
+    else:
+        print("\nAgent stopped after max iterations.")
 
 
 def print_verbose(response, messages):
