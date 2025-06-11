@@ -25,6 +25,7 @@ schema_get_file_content = genai.types.FunctionDeclaration(
                 description="The file path to read content from, relative to the working directory.",
             ),
         },
+        required=["file_path"],
     ),
 )
 
@@ -38,7 +39,15 @@ schema_run_python_file = genai.types.FunctionDeclaration(
                 type=genai.types.Type.STRING,
                 description="Path to the Python (.py) file to execute, relative to the working directory. Absolute paths and paths outside the working directory are not allowed.",
             ),
+            "args": genai.types.Schema(
+                type=genai.types.Type.ARRAY,
+                items=genai.types.Schema(
+                    type=genai.types.Type.STRING,
+                    description="Optional arguments to pass to the Python file.",
+                ),
+            ),
         },
+        required=["file_path"],
     ),
 )
 
@@ -57,5 +66,6 @@ schema_write_file = genai.types.FunctionDeclaration(
                 description="The text data to write to the file. Overwriting existing file contents is allowed."
             ),
         },
+        required=["file_path", "content"],
     ),
 )

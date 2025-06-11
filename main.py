@@ -3,6 +3,7 @@ import sys
 from dotenv import load_dotenv
 from google import genai
 from config import SYSTEM_PROMPT
+from functions.call_function import call_function
 from function_declaration import (
     schema_get_files_info,
     schema_get_file_content,
@@ -63,9 +64,20 @@ def generate_content(client, messages, verbose):
     )
     if response.function_calls:
         for call in response.function_calls:
-            print(f'Calling function: {call.name}({call.args})')
-    print("Response:")
-    print(response.text)
+            function_call_result = call_function(call, verbose=verbose)
+            try:
+                response_data = function_call_result.parts[0].function_response.response
+            except Exception:
+                raise RuntimeError("Fatal Error: No response returned from tool execution.")
+            
+            if verbose:
+                print(f"-> {response_data}")
+
+            messages.append(function_call_result)
+    else:
+        print("Response:")
+        print(response.text or "No output produced.")
+    
     if verbose:
         print_verbose(response, messages)
 

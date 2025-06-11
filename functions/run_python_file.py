@@ -2,7 +2,7 @@ import os
 import subprocess
 
 
-def run_python_file(working_directory, file_path):
+def run_python_file(working_directory, file_path, args=None):
     abs_working_directory = os.path.abspath(working_directory)
     abs_file_path = os.path.abspath(os.path.join(working_directory, file_path))
 
@@ -16,11 +16,16 @@ def run_python_file(working_directory, file_path):
         return f'Error: "{file_path}" is not a Python file.'
 
     try:
-        result = subprocess.run(["python3", abs_file_path], 
+        commands = ["python3", abs_file_path]
+        if args:
+            commands.extend(args)
+        result = subprocess.run(
+                       commands, 
                        timeout=30, 
                        capture_output=True, 
                        cwd=working_directory,
-                       text=True)
+                       text=True
+        )
     except Exception as e:
         return f"Error: executing Python file: {e}"
     
