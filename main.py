@@ -3,7 +3,12 @@ import sys
 from dotenv import load_dotenv
 from google import genai
 from config import SYSTEM_PROMPT
-from function_declaration import schema_get_files_info
+from function_declaration import (
+    schema_get_files_info,
+    schema_get_file_content,
+    schema_run_python_file,
+    schema_write_file,
+)
 
 
 def main():
@@ -44,6 +49,9 @@ def generate_content(client, messages, verbose):
     available_functions = genai.types.Tool(
         function_declarations=[
             schema_get_files_info,
+            schema_get_file_content,
+            schema_run_python_file,
+            schema_write_file,
         ]
     )
     response = client.models.generate_content(
