@@ -3,6 +3,7 @@ import sys
 from dotenv import load_dotenv
 from google import genai
 from config import SYSTEM_PROMPT
+from function_declaration import schema_get_files_info
 
 
 def main():
@@ -40,11 +41,21 @@ def main():
 
 
 def generate_content(client, messages, verbose):
+    available_functions = genai.types.Tool(
+        function_declarations=[
+            schema_get_files_info,
+        ]
+    )
     response = client.models.generate_content(
         model="gemini-2.0-flash-001",
         contents=messages,
-        config=genai.types.GenerateContentConfig(system_instruction=SYSTEM_PROMPT),
+        config=genai.types.GenerateContentConfig(
+            tools=[available_functions],
+            system_instruction=SYSTEM_PROMPT),
     )
+    if response.function_calls:
+        for call in response.function_calls:
+            print(f'Calling function: {call.name}({call.args})')
     print("Response:")
     print(response.text)
     if verbose:
